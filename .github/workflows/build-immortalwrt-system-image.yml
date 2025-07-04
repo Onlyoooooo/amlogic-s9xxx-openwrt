@@ -3,8 +3,8 @@ name: Build immortalwrt system image
 on:
   repository_dispatch:
   workflow_dispatch:
-  schedule:
-    - cron: 0 5 * * *
+  #schedule:
+  #  - cron: 0 5 * * *
 
 env:
   OPENWRT_BOARD: "a311d-oes_wxy-oect_s905d"
