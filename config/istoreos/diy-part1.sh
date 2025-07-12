@@ -22,9 +22,6 @@ sed -i '1i src-git linkease_nas https://github.com/linkease/nas-packages.git;mas
 sed -i '1i src-git linkease_nas_luci https://github.com/linkease/nas-packages-luci.git;main' feeds.conf.default
 # 添加 jjm2473_apps 仓库
 sed -i '1i src-git jjm2473_apps https://github.com/jjm2473/openwrt-apps.git;main' feeds.conf.default
-# 添加 luci-app-passwall2
-rm -rf package/luci-app-passwall2
-git clone https://github.com/xiaorouji/openwrt-passwall2.git package/luci-app-passwall2
 # 添加 晶晨宝盒
 rm -rf package/luci-app-amlogic
 git clone https://github.com/ophub/luci-app-amlogic.git package/luci-app-amlogic
