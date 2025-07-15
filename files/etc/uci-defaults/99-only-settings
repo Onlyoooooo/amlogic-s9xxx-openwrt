@@ -1,0 +1,48 @@
+#!/bin/sh
+# Copyright (C) 2022 jjm2473
+
+# Log file for debugging
+LOGFILE="/tmp/uci-defaults-log.txt"
+echo "Starting 99-custom.sh at $(date)" >> $LOGFILE
+
+# 设置主机名映射 解决安卓原生TV首次连不上网的问题
+uci add dhcp domain
+uci set "dhcp.@domain[-1].name=time.android.com"
+uci set "dhcp.@domain[-1].ip=203.107.6.88"
+uci commit dhcp
+
+# 设置 LAN 口的 DHCP 为关闭状态
+uci set dhcp.lan.ignore="1"
+uci commit dhcp
+
+# 设置LAN静态ip地址
+# uci set network.lan.ipaddr=192.168.2.15
+# uci set network.lan.gateway=192.168.2.1
+# uci set network.lan.dns=192.168.2.1
+uci set network.lan.proto='dhcp'
+uci commit network
+
+# 关闭SYN-flood 防御
+uci set firewall.@defaults[0].synflood_protect=0
+uci commit firewall
+
+# 设置系统时区
+uci set system.@system[0].zonename=Asia/Shanghai
+uci commit system
+
+# 设置默认语言为中文
+uci set luci.main.lang="zh_cn"
+uci commit luci
+
+# 调整Argon主题设置
+uci set luci.main.mediaurlbase='/luci-static/argon'
+uci commit argon
+
+# 设置ttyd自动登录
+sed -i 's/\/bin\/login/\/bin\/login -f root/' /etc/config/ttyd
+
+# 删除无效源
+sed -i '/immortalwrt_kenzo/d' /etc/opkg/distfeeds.conf
+sed -i '/immortalwrt_nikki/d' /etc/opkg/distfeeds.conf
+
+exit 0
