@@ -4,7 +4,7 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron: 0 5 * * 5
+    - cron: 0 0 * * 5
 
 env:
   OPENWRT_BOARD: "a311d-oes_wxy-oect"
@@ -172,10 +172,3 @@ jobs:
             - 固件源码: [${{ steps.codes.outputs.TAGS_NAME }}](${{ steps.codes.outputs.REPO_URL }})
             - 默认地址: DHCP
             - 默认密码: password
-            ### OES：刷入EMMC方法
-            - 解压 OpenWrt 固件压缩包
-            - 将解压后的固件使用写盘工具，如：rufus 写入 U 盘
-            - 插入U盘重启设备 → 登录 OpenWrt → 系统菜单 → 晶晨宝盒 → 安装 OpenWrt → 选择设备型号：409 → 点击安装 → 提示 successful → 拔掉U盘 重启设备
-            ### OEC/OECT：刷入EMMC方法
-            - 解压 OpenWrt 固件压缩包
-            - 使用 RKDevTool.exe 线刷至emmc
