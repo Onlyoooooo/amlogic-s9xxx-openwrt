@@ -4,7 +4,7 @@ on:
   repository_dispatch:
   workflow_dispatch:
   schedule:
-    - cron: 0 5 * * 5
+    - cron: 0 0 * * 5
 
 env:
   FEEDS_CONF: config/x86-immortalwrt/feeds.conf.default
