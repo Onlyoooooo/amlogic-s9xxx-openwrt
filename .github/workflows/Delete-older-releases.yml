@@ -7,7 +7,7 @@ name: Delete older releases
 
 on:
   schedule:
-    - cron: '59 23 * * 5'
+    - cron: '59 23 * * 6'
   repository_dispatch:
   workflow_dispatch:
     inputs:
