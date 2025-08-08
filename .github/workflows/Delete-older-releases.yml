@@ -3,26 +3,26 @@
 # Description: Delete older releases and workflows runs (Scheduled + Fixed Configuration)
 #==========================================================================
 
-name: Delete older releases
+name: Delete Older Releases & Workflows
 
 on:
   schedule:
-    - cron: '59 23 * * 6'
-  repository_dispatch:
-  workflow_dispatch:
+    - cron: '59 23 * * 6'  # 每周六 23:59 执行（纽约时间，可根据需求调整时区）
+  repository_dispatch:  # 支持外部触发
+  workflow_dispatch:    # 支持手动触发，可自定义参数
     inputs:
       delete_releases:
-        description: "Delete Releases file?"
+        description: "是否删除旧版本发布？"
         required: true
         default: true
         type: boolean
       delete_tags:
-        description: "Delete related Tags?"
+        description: "是否删除关联的标签？"
         required: true
         default: true
         type: boolean
       prerelease_option:
-        description: "Whether to differentiate pre-release."
+        description: "是否区分预发布版本（all=全部删除，true=只删预发布，false=只删正式版）"
         required: true
         default: "all"
         type: choice
@@ -31,46 +31,60 @@ on:
           - true
           - false
       delete_workflows:
-        description: "Delete workflows records?"
+        description: "是否删除工作流运行记录？"
         required: true
         default: true
         type: boolean
+      workflows_keep_day:
+        description: "保留最近几天的工作流记录（默认1天）"
+        required: true
+        default: 1
+        type: number
+      releases_keep_latest:
+        description: "保留最新的几个发布版本（默认3个）"
+        required: true
+        default: 3
+        type: number
       out_log:
-        description: "Output detailed JSON logs."
+        description: "是否输出详细JSON日志？"
         required: false
         default: true
         type: boolean
 
 env:
-  TZ: America/New_York
+  TZ: America/New_York  # 时区设置（影响时间判断）
 
 jobs:
-  build:
+  clean_old_assets:
     runs-on: ubuntu-22.04
+    # 触发条件：定时任务 或 仓库所有者手动触发
     if: >-
       github.event_name == 'schedule' || 
-      github.event.repository.owner.id == github.event.sender.id
+      (github.event_name == 'workflow_dispatch' && 
+       github.event.repository.owner.id == github.event.sender.id)
 
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 拉取完整历史（避免标签操作失败）
 
-      - name: Initialization environment
+      - name: Initialize environment
         id: init
-        env:
-          DEBIAN_FRONTEND: noninteractive
         run: |
-          sudo timedatectl set-timezone "${TZ}"
+          # 输出当前时间（用于日志核对时区）
+          echo "Current time: $(date)"
           echo "status=success" >> ${GITHUB_OUTPUT}
 
-      - name: Delete releases and workflows runs
+      - name: Delete older releases and workflows
         uses: ophub/delete-releases-workflows@main
         with:
+          # 传递输入参数到action
           delete_releases: ${{ inputs.delete_releases }}
           delete_tags: ${{ inputs.delete_tags }}
           prerelease_option: ${{ inputs.prerelease_option }}
-          releases_keep_latest: 3
+          releases_keep_latest: ${{ inputs.releases_keep_latest }}  # 保留最新版本数量
           delete_workflows: ${{ inputs.delete_workflows }}
-          workflows_keep_day: 1
+          workflows_keep_day: ${{ inputs.workflows_keep_day }}      # 保留工作流记录天数
           out_log: ${{ inputs.out_log }}
-          gh_token: ${{ secrets.GITHUB_TOKEN }}
+          gh_token: ${{ secrets.GITHUB_TOKEN }}  # 使用仓库默认token（需有delete权限）
