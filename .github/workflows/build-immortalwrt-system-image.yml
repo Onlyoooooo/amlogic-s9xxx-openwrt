@@ -69,18 +69,14 @@ jobs:
         working-directory: /builder
         if: ${{ steps.init.outputs.status }} == 'success' && !cancelled()
         run: |
-          LATEST_TAG=$(curl -sL "https://api.github.com/repos/immortalwrt/immortalwrt/tags" | grep -oP '"name": "\K[^"]+' | head -n 1)
-          if [[ -z "$LATEST_TAG" ]]; then
-            echo "::error::Failed to get the latest tag from the GitHub API."
-            exit 1
-          fi
           REPO_URL="https://github.com/immortalwrt/immortalwrt"
-          FINAL_TAGS_NAME="immortalwrt_${LATEST_TAG}"
-          git clone -b ${LATEST_TAG} --single-branch --filter=blob:none ${REPO_URL} openwrt
+          BRANCH_NAME="master"
+          FINAL_TAGS_NAME="immortalwrt_${BRANCH_NAME}"
+          git clone -b ${BRANCH_NAME} --single-branch --filter=blob:none ${REPO_URL} openwrt
           ln -sf /builder/openwrt ${GITHUB_WORKSPACE}/openwrt
           ln -sf /builder/openwrt /home/runner/work/_actions/ophub/amlogic-s9xxx-openwrt/main/openwrt
-          echo "build_tag=OpenWrt_${FINAL_TAGS_NAME}_save_$(date +"%Y.%m.%d")" >> ${GITHUB_OUTPUT}
-          echo "REPO_URL=${REPO_URL}" >> ${GITHUB_OUTPUT}
+          echo "build_tag=OpenWrt_${FINAL_TAGS_NAME}_$(date +"%Y.%m.%d")" >> ${GITHUB_OUTPUT}
+          echo "REPO_URL=${REPO_URL}/tree/${BRANCH_NAME}" >> ${GITHUB_OUTPUT}
           echo "TAGS_NAME=${FINAL_TAGS_NAME}" >> ${GITHUB_OUTPUT}
           echo "status=success" >> ${GITHUB_OUTPUT}
           df -hT ${PWD}
@@ -171,4 +167,4 @@ jobs:
             - 适配机型: ${{ env.OPENWRT_BOARD }}
             - 固件源码: [${{ steps.codes.outputs.TAGS_NAME }}](${{ steps.codes.outputs.REPO_URL }})
             - 默认地址: DHCP
-            - 默认密码: password
+            - 默认密码: password|
