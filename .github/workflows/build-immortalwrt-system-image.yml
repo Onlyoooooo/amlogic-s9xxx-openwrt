@@ -7,7 +7,7 @@ on:
     - cron: 0 0 * * 5
 
 env:
-  OPENWRT_BOARD: "a311d-oes_wxy-oect"
+  OPENWRT_BOARD: "a311d-oes_wxy-oect_s922x-oes-plus"
   FEEDS_CONF: config/immortalwrt/feeds.conf.default
   CONFIG_FILE: config/immortalwrt/config
   DIY_P1_SH: config/immortalwrt/diy-part1.sh
@@ -107,6 +107,12 @@ jobs:
           chmod +x ${DIY_P2_SH}
           cd openwrt/
           ${GITHUB_WORKSPACE}/${DIY_P2_SH}
+
+      - name: Create Rust config file to disable LLVM download
+        run: |
+          cd openwrt/
+          echo '[llvm]' > config.toml
+          echo 'download-ci-llvm = false' >> config.toml
 
       - name: Download package
         id: package
