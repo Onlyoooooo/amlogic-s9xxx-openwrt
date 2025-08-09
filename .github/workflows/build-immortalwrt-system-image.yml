@@ -108,12 +108,6 @@ jobs:
           cd openwrt/
           ${GITHUB_WORKSPACE}/${DIY_P2_SH}
 
-      - name: Create Rust config file to disable LLVM download
-        run: |
-          cd openwrt/
-          echo '[llvm]' > config.toml
-          echo 'download-ci-llvm = false' >> config.toml
-
       - name: Download package
         id: package
         run: |
